@@ -19,7 +19,7 @@ const ExerciseSchema = new Schema({
     username: {type: String, required: false},
     description: {type: String, required: true},
     duration: {type: Number, required: true},
-    date: {type: String, required: true, default: Date.toDateString}
+    date: {type: String, required: true, default: Date.toDateString} // TODO: change to using Date object
 });
 
 const ExerciseLogSchema = new Schema({
@@ -75,6 +75,12 @@ function findUserById(_id, done) {
       });
 }
 
+function findExercisesByUserAndDate(params, done) {
+    const {user_id, from_date, to_date, limit} = params;
+    // todo
+}
+
 exports.createUser = createUser;
 exports.findUserById = findUserById;
 exports.createExercise = createExercise;
+exports.findExercisesByUserAndDate = findExercisesByUserAndDate;

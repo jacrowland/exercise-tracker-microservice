@@ -96,3 +96,17 @@ app.post("/post/users/:_id/exercises", (req, res) => {
     }]
     }
 */
+
+const findExercisesByUserAndDate = require("./controllers/index.js").findExercisesByUserAndDate;
+app.get("/api/users/:_id/logs", (req, res) => {
+    console.log(req.body);
+    console.log(req.query);
+    const _id = req.body._id;
+    const {from, to, limit } = req.query;
+    
+    const re = /\d{4}-\d{2}-\d{2}/;
+    findExercisesByUserAndDate({user_id: _id, from_date: from, to_date: to, limit: limit}, (err, data) => {
+        // todo
+    });
+
+});
