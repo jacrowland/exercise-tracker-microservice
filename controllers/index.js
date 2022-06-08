@@ -18,8 +18,8 @@ const UserSchema = new Schema({
 const ExerciseSchema = new Schema({
     username: {type: String, required: false},
     description: {type: String, required: true},
-    duration: {type: String, required: true},
-    date: {type: Date, required: true, default: Date.now}
+    duration: {type: Number, required: true},
+    date: {type: String, required: true, default: Date.toDateString}
 });
 
 const ExerciseLogSchema = new Schema({
@@ -30,7 +30,7 @@ const ExerciseLogSchema = new Schema({
 
 // Controllers
 function createUser(name, done) {
-    console.log("Creating user...")
+    console.log("Creating user...");
     const User = mongoose.model('User', UserSchema);
     const newUser = new User({username: name});
     newUser.save((err, data) => {
@@ -39,9 +39,42 @@ function createUser(name, done) {
     })
 }
 
-function createExercise(params, date) {
-    const {userId, description, duration} = params;
-    return;
+function createExercise(params, done) {
+    console.log("Creating user exercise...");
+    const {user_id, description, duration, date} = params;
+    const Exercise = mongoose.model("Exercise", ExerciseSchema);
+    // check if the user exists
+    findUserById(user_id, (err, user) => {
+        if (err) {
+            done(err, null);
+        }
+        else {
+            // if so...create and save a new exercise
+            const newExercise = new Exercise({
+                username: user.username,
+                description: description,
+                duration: parseInt(duration),
+                date: date
+            });
+            newExercise.save((err, data) => {
+                if (err) {
+                    done(err, null)
+                }
+                else {
+                    done(null, data);
+                }
+            })
+        }
+    });
+}
+
+function findUserById(_id, done) {
+    const User = mongoose.model('User', UserSchema);
+    User.findById(_id, (err, document) => {
+        err ? done(err, null) : done(null, document);
+      });
 }
 
 exports.createUser = createUser;
+exports.findUserById = findUserById;
+exports.createExercise = createExercise;

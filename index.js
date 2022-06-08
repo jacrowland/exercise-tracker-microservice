@@ -9,17 +9,19 @@ app.use(express.static('public'))
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-
-
 const listener = app.listen(process.env.PORT || 3000, () => {
     console.log('Your app is listening on port ' + listener.address().port)
   })
 
-
 // API Routes
+
+/*
+    GET /
+*/
 app.get('/', (req, res) => {
     res.sendFile(__dirname + '/views/index.html')
   });
+
 /*
     POST /api/users
     {
@@ -39,7 +41,7 @@ app.post('/api/users', (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(400).json({error: 'An error occured'})
+        res.status(400).json({error: 'An error occured'});
     }
 });
 
@@ -53,6 +55,34 @@ app.post('/api/users', (req, res) => {
     _id: "5fb5853f734231456ccb3b05"
     }
 */
+const createExercise = require("./controllers/index.js").createExercise;
+app.post("/post/users/:_id/exercises", (req, res) => {
+    try {
+        const _id = req.params._id;
+        const { description, duration, date } = req.body;
+        const re = /\d{4}-\d{2}-\d{2}/;
+        if (new Date(date).toDateString() != "Invalid Date" && re.test(date) && duration != '' && !isNaN(parseInt(duration)) && description != '') {
+            createExercise({description: description, duration: duration, date: date, user_id: _id}, (err, document) => {
+                if (err) throw(err);
+                else res.json({
+                    username: document.username,
+                    description: document.description,
+                    duration: document.duration,
+                    date: new Date(document.date).toDateString(),
+                    _id: document._id
+                });
+            });
+        }
+        else {
+            throw("Input Validation Error");
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res.status(400).json({error: 'An error occured'});
+    }
+});
+
 // GET /api/users/:_id/logs?[from][&to][&limit] ([] = optional; from, to = dates (yyyy-mm-dd); limit = number)
 /*
     {
