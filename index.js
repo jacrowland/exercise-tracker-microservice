@@ -2,6 +2,7 @@ const express = require("express");
 const app = express()
 const cors = require('cors')
 const bodyParser = require("body-parser");
+
 require('dotenv').config()
 
 app.use(cors())
@@ -41,7 +42,7 @@ app.post('/api/users', (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(400).json({error: 'An error occured'});
+        res.status(400);
     }
 });
 
@@ -79,7 +80,7 @@ app.post("/post/users/:_id/exercises", (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(400).json({error: 'An error occured'});
+        res.status(400);
     }
 });
 
@@ -96,17 +97,38 @@ app.post("/post/users/:_id/exercises", (req, res) => {
     }]
     }
 */
+const { findUserById } = require("./controllers/index.js");
+const { response } = require("express");
 
 const findExercisesByUserAndDate = require("./controllers/index.js").findExercisesByUserAndDate;
 app.get("/api/users/:_id/logs", (req, res) => {
-    console.log(req.body);
-    console.log(req.query);
-    const _id = req.body._id;
-    const {from, to, limit } = req.query;
-    
-    const re = /\d{4}-\d{2}-\d{2}/;
-    findExercisesByUserAndDate({user_id: _id, from_date: from, to_date: to, limit: limit}, (err, data) => {
-        // todo
-    });
+    try {
+        const _id = req.params._id;
+        const {from, to, limit } = req.query;
+        //const re = /\d{4}-\d{2}-\d{2}/;
 
+        findUserById(_id, (err, user) => {
+            findExercisesByUserAndDate({user_id: _id, from_date: from, to_date: to, limit: limit}, (err, data) => {
+                if (data != null) {
+                    count = data.length;
+                    log = data
+                }
+                else {
+                    count = 0;
+                    log = []
+                }
+
+                res.json({
+                    username: user.username,
+                    _id: user._id,
+                    count: count,
+                    log: log
+                });
+            });
+        });
+    }
+    catch (err) {
+        console.log(err);
+        res.status(400);
+    }
 });

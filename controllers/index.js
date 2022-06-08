@@ -19,7 +19,7 @@ const ExerciseSchema = new Schema({
     username: {type: String, required: false},
     description: {type: String, required: true},
     duration: {type: Number, required: true},
-    date: {type: String, required: true, default: Date.toDateString} // TODO: change to using Date object
+    date: {type: Date, required: true, default: Date.now, max: Date.now} // TODO: change to using Date object
 });
 
 const ExerciseLogSchema = new Schema({
@@ -76,8 +76,19 @@ function findUserById(_id, done) {
 }
 
 function findExercisesByUserAndDate(params, done) {
-    const {user_id, from_date, to_date, limit} = params;
-    // todo
+    let {user_id, from_date, to_date, limit} = params;
+
+    limit = limit === undefined ? 100 : limit;
+    from_date = from_date === undefined ? new Date('1900-01-01') : new Date(from_date);
+    to_date = to_date === undefined ? new Date('2500-01-01') : new Date(to_date);
+
+    findUserById(user_id, (err, user) => {
+        const Exercise = mongoose.model("Exercise", ExerciseSchema);
+        var query = Exercise.find({username: user.username, date: {"$gte": from_date, "$lt": to_date}}).limit(limit).select("description date duration -_id");
+        query.exec((err, documents) => {
+            err ? done (err, null) : done(null, documents);
+        });
+    });
 }
 
 exports.createUser = createUser;
