@@ -1,0 +1,20 @@
+{
+  "name": "exercise-tracker",
+  "version": "1.0.0",
+  "description": "Excerise Tracking Microservice",
+  "main": "index.js",
+  "scripts": {
+    "test": "start index.js",
+    "start": "start index.js"
+  },
+  "author": "Jacob Rowland",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "mongodb": "^4.7.0",
+    "mongoose": "^6.3.6"
+  }
+}
