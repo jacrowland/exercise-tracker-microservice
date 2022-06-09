@@ -57,7 +57,7 @@ app.post('/api/users', (req, res) => {
     }
 */
 const createExercise = require("./controllers/index.js").createExercise;
-app.post("/post/users/:_id/exercises", (req, res) => {
+app.post("/api/users/:_id/exercises", (req, res) => {
     try {
         const _id = req.params._id;
         const { description, duration, date } = req.body;

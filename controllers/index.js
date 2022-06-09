@@ -30,7 +30,6 @@ const ExerciseLogSchema = new Schema({
 
 // Controllers
 function createUser(name, done) {
-    console.log("Creating user...");
     const User = mongoose.model('User', UserSchema);
     const newUser = new User({username: name});
     newUser.save((err, data) => {
@@ -40,7 +39,6 @@ function createUser(name, done) {
 }
 
 function createExercise(params, done) {
-    console.log("Creating user exercise...");
     const {user_id, description, duration, date} = params;
     const Exercise = mongoose.model("Exercise", ExerciseSchema);
     // check if the user exists

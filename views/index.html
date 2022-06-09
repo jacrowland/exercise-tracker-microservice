@@ -1,13 +1,122 @@
 <html lang="en">
     <head>
         <title>Exercise Tracker</title>
+
+
+        <style>
+            body {
+                width: 100%;
+                margin: 0;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            main {
+                width: inherit;
+                height: inherit;
+            }
+            h1 {
+                color: white;
+                text-align: center;
+                margin-top: 20px;
+            }
+            input[type="submit"] {
+                width: 100%;
+                font-weight: bolder;
+                box-shadow: 0px 5px 0px 0px black;
+                position: relative;
+                height: 35px;
+
+            }
+            input[type="submit"]:hover {
+                cursor: pointer;
+                box-shadow: unset;
+                top: 2.5px;
+                background-color: white;
+                height: 35px;
+                border: 1px solid grey;
+            }
+            body {
+                background-color: rgb(67, 75, 190);
+            }
+            form, section {
+                width: 50%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                background-color: rgb(245, 245, 245);
+                box-shadow:  5px 5px 0px 0px black;
+                padding: 20px;
+                margin: 0 auto;
+                margin-bottom: 20px;
+            }
+            label {
+                background-color: yellow;
+                padding: 5px 0px;
+                
+            }
+            input {
+                margin: 10px 0px;
+                padding: 7.5px;
+            }
+            input[type="text"], input[type="date"],  label, h2 {
+                width: 100%;
+            }
+            @media screen and (max-width: 800px) {
+                form, section {
+                    width: 80vw;
+                }
+            }
+            footer {
+                width: 100%;
+                text-align: center;
+                font-family: monospace;
+                margin-bottom: 30px;
+                color: white;
+            }
+
+            footer a {
+                color: inherit;
+            }
+            
+        </style>
     </head>
     <body>
         <main>
             <h1>Exercise Tracker</h1>
+            <form method="post" action="/api/users">
+                <h2>Create a New User</h2>
+                <label>POST /api/users</label>
+                <input type="text" name="username" placeholder="username"/>
+                <input type="submit"/>
+            </form>
+
+            <form id="getExercisesForm" method="post">
+                <h2>Add exercises</h2>
+                <label>POST /api/users/:_id/exercises</label>
+                <input type="text" placeholder=":_id" name="userid"/>
+                <input type="text" placeholder="description" name="description"/>
+                <input type="text" placeholder="duration* (mins.)" name="duration"/>
+                <input type="date" placeholder="date (yyyy-mm-dd)" name="date" />
+                <input type="submit" value="Submit"/>
+            </form>
+            <section>
+                <h2>GET user's exercise log</h2>
+                <span style="background-color: yellow; width: 100%; padding: 5px 0px"><label></label>GET /api/users/:_id/logs?[from][&to][&limit]</span><br>
+                <span style="background-color: white; width: 100%"><strong>[ ]</strong> = optional</span><br>
+                <span style="background-color: white; width: 100%"><strong>from, to</strong> = dates (yyyy-mm-dd); <strong>limit</strong> = number</span>
+            </section>
         </main>
+        <footer>
+            By <a href="https://jacobrowland.me">Jacob Rowland</a>
+        </footer>
     </body>
-    <footer>
-        
-    </footer>
+    <script>
+        const form = document.getElementById("getExercisesForm");
+        form.addEventListener("submit", (e) => {
+            const userid = e.target.elements.userid.value;
+            form.action = `/api/users/${userid}/exercises`;
+            console.log(form.action);
+            form.submit();
+        });
+    </script>
 </html>
