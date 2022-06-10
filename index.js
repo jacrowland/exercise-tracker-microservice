@@ -1,17 +1,17 @@
 const express = require("express");
-const app = express()
-const cors = require('cors')
+const app = express();
+const cors = require('cors');
 const bodyParser = require("body-parser");
 
 require('dotenv').config()
 
-app.use(cors())
-app.use(express.static('public'))
+app.use(cors());
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use('/public', express.static(__dirname + '/public'));
 
 const listener = app.listen(process.env.PORT || 3000, () => {
-    console.log('Your app is listening on port ' + listener.address().port)
+    console.log('Your app is listening on port ' + listener.address().port);
   })
 
 // API Routes
@@ -20,7 +20,7 @@ const listener = app.listen(process.env.PORT || 3000, () => {
     GET /
 */
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/views/index.html')
+    res.sendFile(__dirname + '/views/index.html');
   });
 
 /*
@@ -42,9 +42,23 @@ app.post('/api/users', (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(400);
+        res.status(400).end();
     }
 });
+
+const getAllUsers = require("./controllers/index.js").getAllUsers;
+app.get('/api/users', (req, res) => {
+    try{
+        getAllUsers((err, array)=>{
+            if (err) throw(err);
+            else res.json(array);
+        })
+    }
+    catch (err) {
+        console.log(err);
+        res.status(400).end();
+    }
+})
 
 // POST /api/users/:_id/exercises
 /*
@@ -56,11 +70,17 @@ app.post('/api/users', (req, res) => {
     _id: "5fb5853f734231456ccb3b05"
     }
 */
+
 const createExercise = require("./controllers/index.js").createExercise;
 app.post("/api/users/:_id/exercises", (req, res) => {
     try {
         const _id = req.params._id;
-        const { description, duration, date } = req.body;
+        let { description, duration, date } = req.body;
+
+        if (date === undefined) {
+            date = new Date().toISOString().slice(0, 10); // get current date as YYYY-MM-DD
+        }
+
         const re = /\d{4}-\d{2}-\d{2}/;
         if (new Date(date).toDateString() != "Invalid Date" && re.test(date) && duration != '' && !isNaN(parseInt(duration)) && description != '') {
             createExercise({description: description, duration: duration, date: date, user_id: _id}, (err, document) => {
@@ -70,7 +90,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
                     description: document.description,
                     duration: document.duration,
                     date: new Date(document.date).toDateString(),
-                    _id: document._id
+                    _id: _id
                 });
             });
         }
@@ -80,7 +100,7 @@ app.post("/api/users/:_id/exercises", (req, res) => {
     }
     catch (err) {
         console.log(err);
-        res.status(400);
+        res.status(400).end();
     }
 });
 
@@ -98,37 +118,30 @@ app.post("/api/users/:_id/exercises", (req, res) => {
     }
 */
 const { findUserById } = require("./controllers/index.js");
-const { response } = require("express");
 
 const findExercisesByUserAndDate = require("./controllers/index.js").findExercisesByUserAndDate;
 app.get("/api/users/:_id/logs", (req, res) => {
-    try {
-        const _id = req.params._id;
-        const {from, to, limit } = req.query;
-        //const re = /\d{4}-\d{2}-\d{2}/;
+    const _id = req.params._id;
+    const {from, to, limit } = req.query;
 
-        findUserById(_id, (err, user) => {
-            findExercisesByUserAndDate({user_id: _id, from_date: from, to_date: to, limit: limit}, (err, data) => {
-                if (data != null) {
-                    count = data.length;
-                    log = data
-                }
-                else {
-                    count = 0;
-                    log = []
-                }
-
+    findUserById(_id, (err, user) => {
+        if (err) {
+            return console.log(err);
+        }
+        else {
+            findExercisesByUserAndDate({user_id: user._id, from_date: from, to_date: to, limit: limit}, (err, exercises) => {
+                let log = exercises.map((exercise) => ({
+                    description: exercise.description,
+                    duration: exercise.duration,
+                    date: exercise.date.toDateString(),
+                    }));
                 res.json({
                     username: user.username,
                     _id: user._id,
-                    count: count,
+                    count: exercises.length,
                     log: log
-                });
+                }); 
             });
-        });
-    }
-    catch (err) {
-        console.log(err);
-        res.status(400);
-    }
+        }
+    });
 });

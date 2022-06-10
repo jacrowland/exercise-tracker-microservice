@@ -1,4 +1,5 @@
 require('dotenv').config();
+const res = require('express/lib/response');
 const mongoose = require("mongoose");
 const { Schema } = mongoose;
 const MONGO_URI = process.env.MONGO_URI;
@@ -38,6 +39,13 @@ function createUser(name, done) {
     })
 }
 
+function getAllUsers(done) {
+    const User = mongoose.model("User", UserSchema);
+    User.find({}).select('-__v').exec((err, array) => {
+        err ? done(err, null): done(null, array);
+    });
+}
+
 function createExercise(params, done) {
     const {user_id, description, duration, date} = params;
     const Exercise = mongoose.model("Exercise", ExerciseSchema);
@@ -75,17 +83,31 @@ function findUserById(_id, done) {
 
 function findExercisesByUserAndDate(params, done) {
     let {user_id, from_date, to_date, limit} = params;
-
-    limit = limit === undefined ? 100 : limit;
-    from_date = from_date === undefined ? new Date('1900-01-01') : new Date(from_date);
-    to_date = to_date === undefined ? new Date('2500-01-01') : new Date(to_date);
-
+    const Exercise = mongoose.model("Exercise", ExerciseSchema);
+    const re = /\d{4,4}-\d{2,2}-\d{2,2}/;
     findUserById(user_id, (err, user) => {
-        const Exercise = mongoose.model("Exercise", ExerciseSchema);
-        var query = Exercise.find({username: user.username, date: {"$gte": from_date, "$lt": to_date}}).limit(limit).select("description date duration -_id");
-        query.exec((err, documents) => {
-            err ? done (err, null) : done(null, documents);
-        });
+        if (user === null) {
+            return done(err, null);
+        }
+        else {
+            let query = Exercise.find({username: user.username});
+            if (Date.parse(from_date) !== NaN && to_date !== undefined) {
+                console.log('adding from date');
+                query.find({date: {"$gte": from_date}});
+            }
+            if (Date.parse(to_date) !== NaN && to_date !== undefined) {
+                console.log('adding to date');
+                query.find({date: {'$lt': to_date}});
+            }
+            if (limit !== undefined) {
+                console.log('adding limit');
+                query.limit(limit);
+            }
+            query.select("description date duration -_id");
+            query.exec((err, documents) => {
+                err ? done(err, null) : done(null, documents);
+            });
+        }
     });
 }
 
@@ -93,3 +115,4 @@ exports.createUser = createUser;
 exports.findUserById = findUserById;
 exports.createExercise = createExercise;
 exports.findExercisesByUserAndDate = findExercisesByUserAndDate;
+exports.getAllUsers = getAllUsers;

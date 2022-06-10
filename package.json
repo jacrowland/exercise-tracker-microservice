@@ -4,8 +4,8 @@
   "description": "Excerise Tracking Microservice",
   "main": "index.js",
   "scripts": {
-    "test": "start index.js",
-    "start": "start index.js"
+    "test": "node index.js",
+    "start": "node index.js"
   },
   "author": "Jacob Rowland",
   "license": "ISC",
